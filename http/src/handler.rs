@@ -141,15 +141,21 @@ impl<'a> Http<'a> {
     }
 
     pub fn send(&mut self, s: String) -> usize {
-        self.stream.write(s.as_bytes()).unwrap()
+        self.send_buf(s.as_bytes())
     }
 
     pub fn send_buf(&mut self, buf: &[u8]) -> usize {
-        self.stream.write(buf).unwrap()
+        self.send_vec(buf.to_vec())
     }
 
     pub fn send_vec(&mut self, buf: Vec<u8>) -> usize {
-        self.stream.write(buf.as_ref()).unwrap()
+        match self.stream.write(buf.as_ref()) {
+            Err(_e) => {
+                self.connection = Connection::Close;
+                0
+            }
+            Ok(v) => v,
+        }
     }
 
     pub fn write_response(&mut self, response: Vec<u8>) {

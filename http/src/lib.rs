@@ -61,7 +61,6 @@ impl Server {
                             else {
                             self.sockets.rotate_right(1);
                             }
-                            sleep(Duration::from_micros(1));
                         } else {
                             self.sockets.pop();
                         }
