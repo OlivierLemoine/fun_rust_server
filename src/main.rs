@@ -16,6 +16,4 @@ fn main() {
         })
         .statics("./static")
         .listen();
-
-    String::from("test").as_str();
 }

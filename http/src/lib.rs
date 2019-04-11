@@ -57,9 +57,8 @@ impl Server {
                         } {
                             if self.sockets.len() > 10 {
                                 self.sockets.pop();
-                            }
-                            else {
-                            self.sockets.rotate_right(1);
+                            } else {
+                                self.sockets.rotate_right(1);
                             }
                         } else {
                             self.sockets.pop();
