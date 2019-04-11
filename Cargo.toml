@@ -1,0 +1,18 @@
+[package]
+name = "rust"
+version = "0.1.0"
+authors = ["olivierlemoine <olivier.lemoine@sii.fr>"]
+edition = "2018"
+
+[dependencies]
+http_wrapper = { path = "http_wrapper" }
+
+[profile.dev]
+opt-level = 0
+debug = true
+overflow-checks = true
+
+[profile.release]
+opt-level = 3
+debug = false
+overflow-checks = false

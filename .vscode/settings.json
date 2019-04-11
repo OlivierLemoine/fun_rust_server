@@ -1,0 +1,5 @@
+{
+    "debug.allowBreakpointsEverywhere": true,
+    "rust.all_features": true,
+    "rust.build_on_save": true
+}
