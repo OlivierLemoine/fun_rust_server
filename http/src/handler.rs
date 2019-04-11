@@ -152,6 +152,7 @@ impl<'a> Http<'a> {
         match self.stream.write(buf.as_ref()) {
             Err(_e) => {
                 self.connection = Connection::Close;
+                println!("{}", _e);
                 0
             }
             Ok(v) => v,
@@ -189,5 +190,36 @@ Connection: {}\r\n\r\n",
 
         self.send(header);
         self.send_vec(response);
+    }
+
+    pub fn redirect(&mut self, addr: Vec<u8>) {
+        let status_response = "302 Found";
+
+        let header = format!(
+            "HTTP/1.1 {}
+Location: {}\r\n\r\n\r\n\r\n",
+            status_response,
+            String::from_utf8(addr).unwrap(),
+        );
+
+        self.send(header);
+    }
+
+    pub fn redirect_param(&mut self, addr: Vec<u8>, status: u32) {
+        let status_response = match status {
+            302 => "302 Found",
+            303 => "302 See Other",
+            307 => "302 Temporary Redirect",
+            _ => "302 Found",
+        };
+
+        let header = format!(
+            "HTTP/1.1 {}
+Location: {}\r\n\r\n\r\n\r\n",
+            status_response,
+            String::from_utf8(addr).unwrap(),
+        );
+
+        self.send(header);
     }
 }

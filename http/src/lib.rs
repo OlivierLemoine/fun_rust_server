@@ -8,7 +8,8 @@ pub mod url;
 
 pub struct Server {
     listener: TcpListener,
-    sockets: Vec<TcpStream>,
+    waiting_sockets: Vec<TcpStream>,
+    // waiting_sockets: Vec<TcpStream>,
 }
 
 impl Server {
@@ -19,7 +20,7 @@ impl Server {
 
         Server {
             listener,
-            sockets: Vec::new(),
+            waiting_sockets: Vec::new(),
         }
     }
 
@@ -28,18 +29,18 @@ impl Server {
             match stream {
                 Ok(s) => {
                     s.set_read_timeout(Some(Duration::new(0, 1))).unwrap();
-                    self.sockets.insert(0, s);
+                    self.waiting_sockets.insert(0, s);
                 }
                 Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
-                    if self.sockets.len() > 0 {
-                        let sock = &self.sockets[0];
+                    if self.waiting_sockets.len() > 0 {
+                        let sock = &self.waiting_sockets[0];
 
                         let mut buf = [0; 1];
                         if match sock.peek(&mut buf) {
                             Err(_e) => true,
                             Ok(0) => false,
                             Ok(_v) => {
-                                let mut handler = match handler::Http::parse(&mut self.sockets[0]) {
+                                let mut handler = match handler::Http::parse(&mut self.waiting_sockets[0]) {
                                     Ok(h) => h,
                                     Err(ref e) if e.kind() == io::ErrorKind::BrokenPipe => {
                                         return;
@@ -55,13 +56,13 @@ impl Server {
                                 }
                             }
                         } {
-                            if self.sockets.len() > 10 {
-                                self.sockets.pop();
+                            if self.waiting_sockets.len() > 10 {
+                                self.waiting_sockets.pop();
                             } else {
-                                self.sockets.rotate_right(1);
+                                self.waiting_sockets.rotate_right(1);
                             }
                         } else {
-                            self.sockets.pop();
+                            self.waiting_sockets.pop();
                         }
                     } else {
                         sleep(Duration::from_micros(50));
